@@ -1,0 +1,68 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import unittest
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+class Login(unittest.TestCase):
+    def setUp(self):
+        self.driver = webdriver.Edge()
+        self.driver.maximize_window()
+        self.driver.get('https://the-internet.herokuapp.com/')
+        self.driver.find_element(By.LINK_TEXT, 'Form Authentication').click()
+    def tearDown(self):
+        self.driver.quit()
+
+
+#Test1: Verificati ca noul url e corect
+
+    def test_verificare_url(self):
+        actual = self.driver.current_url
+        expected = 'https://the-internet.herokuapp.com/login'
+        self.assertEqual(expected,actual, 'Url-ul este incorect')
+
+#Test2: Verificati ca page title e corect
+
+    def test_titlu_pagina(self):
+        actual = self.driver.title
+        expected = 'The Internet'
+        self.assertEqual(expected,actual,'Titlul paginii este incorect')
+
+#Test 3: Verificati textul de pe elementul xpath=//h2 e corect
+
+    def test_element_text(self):
+        actual = self.driver.find_element(By.XPATH,'//h2[text()="Login Page"]').text
+        expected = 'Login Page'
+        self.assertEqual(expected,actual, 'Textul elementului este diferit')
+
+#Test 4: Verificati ca butonul de login este displayed
+
+    def test_login_displayed(self):
+        actual = self.driver.find_element(By.CLASS_NAME,'radius').is_displayed()
+        expected = True
+        self.assertEqual(expected, actual, 'Login nu este afisat')
+
+#Test 5: Verificati ca atributul href al linkului ‘Elemental Selenium’ e corect
+
+    def test_atribut_href(self):
+        actual = self.driver.find_element(By.LINK_TEXT,'Elemental Selenium').get_attribute('href')
+        expected = "http://elementalselenium.com/"
+        self.assertEqual(expected, actual, 'Atributul este incorect')
+
+#Test 6: Lasati goale user si pass; Click login; Verifica ca eroarea e displayed
+
+    def test_fara_credentiale(self):
+        self.driver.find_element(By.ID,'login').click()
+        actual = self.driver.find_element(By.ID,'flash-messages').is_displayed()
+        expected = True
+        self.assertEqual(expected, actual, 'Mesajul de eroare nu este afisat')
+
+#Test 7: Completeaza cu user si pass invalide. Click login. Verifica ca mesajul de pe eroare e corect. Este si un x pus acolo extra asa ca vom folosi solutia de mai jos
+
+    def test_credentiale(self):
+        self.driver.find_element(By.ID,'username').send_keys('test@gmail.com')
+        self.driver.find_element(By.ID,'password').send_keys('parola')
+        self.driver.find_element(By.CLASS_NAME,'radius').click()
+        actual = WebDriverWait(self.driver, 25).until(EC.visibility_of_element_located((By.CSS_SELECTOR,'div#flash'))).text
+        expected = 'Your username is invalid!'
+        self.assertTrue(expected in actual,'Error message text is incorrect')
